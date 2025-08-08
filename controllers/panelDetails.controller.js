@@ -1,5 +1,5 @@
-import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService } from "../services/panelDetails.service.js";
-import { createPanelDetailsValidation, getPanelDetailsValidation } from "../validations/panelDetails.validation.js";
+import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService } from "../services/panelDetails.service.js";
+import { createPanelDetailsValidation, getPanelDetailsValidation, updatePanelDetailsValidation } from "../validations/panelDetails.validation.js";
 
 export const createPanelDetails = async (req, res) => {
   try {
@@ -58,6 +58,23 @@ export const removePanelDetails = async (req, res) => {
     
   } catch (err) {
     console.error('Delete PanelDetails Error:', err.message);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+};
+
+export const updatePanelDetails = async (req, res) => {
+  try {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    }
+
+    const { error } = updatePanelDetailsValidation.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const result = await updatePanelDetailsService(req.params.panelDetailsId, req.body, req.files);
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error('Update PanelDetails Error:', err.message);
     res.status(500).json({ error: err.message || 'Internal server error' });
   }
 };

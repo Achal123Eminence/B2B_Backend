@@ -1,5 +1,5 @@
 import express from "express";
-import { createPanelDetails, getPanelDetails, removePanelDetails } from "../controllers/panelDetails.controller.js";
+import { createPanelDetails, getPanelDetails, removePanelDetails, updatePanelDetails } from "../controllers/panelDetails.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import { upload } from "../helper/multer.js";
 
@@ -18,5 +18,16 @@ panelDetailsRouter.post(
 );
 panelDetailsRouter.get('/getPanelDetails', authenticate, getPanelDetails);
 panelDetailsRouter.delete('/remove/:id', authenticate, removePanelDetails );
+panelDetailsRouter.put(
+  '/updatePanelDetails/:panelDetailsId',
+  authenticate,
+  upload.fields([
+    { name: 'website_logo', maxCount: 1 },
+    { name: 'website_logo_web', maxCount: 1 },
+    { name: 'website_logo_mobile', maxCount: 1 },
+    { name: 'website_favicon', maxCount: 1 },
+  ]),
+  updatePanelDetails
+);
 
 export default panelDetailsRouter;

@@ -82,3 +82,36 @@ export const deletePanelDetailsService = async (id) => {
     deletedPanelId: id
   };
 };
+
+export const updatePanelDetailsService = async (panelDetailsId, body, files) => {
+  const panelDetails = await PanelDetails.findById(panelDetailsId);
+  if (!panelDetails) throw new Error('PanelDetails not found');
+
+  const user = await User.findById(panelDetails.userId);
+  if (!user) throw new Error('User not found');
+
+  const updates = {};
+  if (body.website_name) updates.website_name = body.website_name.toLowerCase();
+  if (body.website_url) updates.website_url = body.website_url;
+  if (body.refresh_endpoint_url) updates.refresh_endpoint_url = body.refresh_endpoint_url;
+  if (body.website_logo_variant !== undefined) updates.website_logo_variant = body.website_logo_variant?.trim() || 'Logo';
+  if (body.website_logo_web_variant !== undefined) updates.website_logo_web_variant = body.website_logo_web_variant?.trim() || 'LoginImage';
+  if (body.website_logo_mobile_variant !== undefined) updates.website_logo_mobile_variant = body.website_logo_mobile_variant?.trim() || 'MloginImage';
+  if (body.website_favicon_variant !== undefined) updates.website_favicon_variant = body.website_favicon_variant?.trim() || 'Favicon';
+
+  const uploadFields = ['website_logo', 'website_logo_web', 'website_logo_mobile', 'website_favicon'];
+  for (const field of uploadFields) {
+    if (files && files[field]) {
+      const file = files[field][0];
+      const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
+      updates[field] = result?.result?.id || '';
+    }
+  }
+
+  const updated = await PanelDetails.findByIdAndUpdate(panelDetailsId, updates, { new: true });
+
+  return {
+    message: 'Panel details updated successfully',
+    panelDetails: updated,
+  };
+};

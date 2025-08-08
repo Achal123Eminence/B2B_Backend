@@ -18,3 +18,12 @@ export const getPanelDetailsValidation = Joi.object({
   limit: Joi.number().integer().min(1).max(100).optional(),
 });
 
+export const updatePanelDetailsValidation = Joi.object({
+  website_name: Joi.string().optional(),
+  website_url: Joi.string().uri().optional(),
+  refresh_endpoint_url: Joi.string().uri().optional(),
+  website_logo_variant: Joi.string().allow('').optional(),
+  website_logo_web_variant: Joi.string().allow('').optional(),
+  website_logo_mobile_variant: Joi.string().allow('').optional(),
+  website_favicon_variant: Joi.string().allow('').optional(),
+});

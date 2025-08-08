@@ -57,3 +57,64 @@ export const getBannersByPanelDetailsService = async (panelDetailsId) => {
     .sort({ createdAt: -1 });
   return banners;
 };
+
+export const removeBannerService = async (bannerId) => {
+  const banner = await Banner.findById(bannerId);
+  if (!banner) throw new Error("Banner not found");
+
+  const panelDetails = await PanelDetails.findById(banner.panelDetailsId);
+  if (!panelDetails) throw new Error("Associated PanelDetails not found");
+
+  const user = await User.findById(banner.userId);
+  if (!user) throw new Error("User not found");
+
+  // Optional: delete from Cloudflare if needed
+  // if (banner.image_type !== "csv" && banner.banner) {
+  //   await deleteFromCloudflare(banner.banner, user.cloud_account_id, user.cloud_auth);
+  // }
+
+  await banner.deleteOne();
+
+  return {
+    message: "Banner deleted successfully",
+    bannerId
+  };
+}
+
+export const updateBannerService = async (bannerId, body, file) => {
+  const { banner_variant, image_type } = body;
+
+  const existingBanner = await Banner.findById(bannerId);
+  if (!existingBanner) throw new Error("Banner not found");
+
+  const panelDetails = await PanelDetails.findById(existingBanner.panelDetailsId);
+  if (!panelDetails) throw new Error("PanelDetails not found");
+
+  const user = await User.findById(panelDetails.userId);
+  if (!user) throw new Error("User not found");
+
+  let updatedFields = {
+    banner_variant: banner_variant?.trim() || existingBanner.banner_variant,
+    image_type
+  };
+
+  if (image_type === "image") {
+    if (!file) throw new Error("Banner image is required for image type");
+
+    const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
+    updatedFields.banner = result?.result?.id || existingBanner.banner;
+  }
+
+  // If image_type is CSV, retain existing banner value or update if file exists
+  if (image_type === "csv" && file) {
+    const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
+    updatedFields.banner = result?.result?.id || existingBanner.banner;
+  }
+
+  const updatedBanner = await Banner.findByIdAndUpdate(bannerId, updatedFields, { new: true });
+
+  return {
+    message: "Banner updated successfully",
+    banner: updatedBanner
+  };
+};
