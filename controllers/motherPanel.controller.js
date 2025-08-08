@@ -39,6 +39,11 @@ export const createMotherPanel = async (req, res) => {
 
 export const getMotherPanel = async (req, res) => {
   try {
+    // Ensure only admins can create a panel
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    };
+    
     // Validate query params
     const { error, value } = getMotherPanelListValidation.validate(req.query);
     if (error) {

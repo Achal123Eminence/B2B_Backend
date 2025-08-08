@@ -29,6 +29,14 @@ const panelDetailsSchema = new mongoose.Schema({
     type: String, 
     default: "Logo" 
   },
+  website_logo_second: {
+    type: String,
+    default: ""
+  },
+  website_logo_variant_second: { 
+    type: String, 
+    default: "Logo" 
+  },
   website_logo_web: {
     type: String,
     default: ""

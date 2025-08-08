@@ -1,4 +1,4 @@
-import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService } from "../services/panelDetails.service.js";
+import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService, getSinglePanelDetailService } from "../services/panelDetails.service.js";
 import { createPanelDetailsValidation, getPanelDetailsValidation, updatePanelDetailsValidation } from "../validations/panelDetails.validation.js";
 
 export const createPanelDetails = async (req, res) => {
@@ -78,3 +78,27 @@ export const updatePanelDetails = async (req, res) => {
     res.status(500).json({ error: err.message || 'Internal server error' });
   }
 };
+
+export const getSinglePanelDetails = async (req,res)=>{
+  try {
+    // Ensure only admins can create a panel
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    };
+
+    const { panelId } = req.query;
+
+    const panel = await getSinglePanelDetailService(panelId);
+    if (!panel) {
+      return res.status(404).json({ message: "Panel details not found" });
+    }
+
+    return res.status(200).json({
+      message: "Panel details fetched successfully",
+      data: panel,
+    });
+  } catch (error) {
+    console.error('Get Panel Details Error:', err.message);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+}

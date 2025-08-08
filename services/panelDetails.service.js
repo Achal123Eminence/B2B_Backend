@@ -4,7 +4,7 @@ import PanelDetails from "../models/panelDetails.model.js";
 import User from "../models/user.model.js";
 
 export const createPanelDetailsService = async (body, files) => {
-  const { userId, panelId, website_name, website_url, refresh_endpoint_url,website_logo_variant, website_logo_web_variant, website_logo_mobile_variant, website_favicon_variant } = body;
+  const { userId, panelId, website_name, website_url, refresh_endpoint_url,website_logo_variant,website_logo_variant_second, website_logo_web_variant, website_logo_mobile_variant, website_favicon_variant } = body;
 
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
@@ -16,7 +16,7 @@ export const createPanelDetailsService = async (body, files) => {
   if (existing) throw new Error('Panel detail with this website name already exists');
 
   const uploadedImages = {};
-  const uploadFields = ['website_logo', 'website_logo_web', 'website_logo_mobile', 'website_favicon'];
+  const uploadFields = ['website_logo', 'website_logo_second', 'website_logo_web', 'website_logo_mobile', 'website_favicon'];
 
   for (const field of uploadFields) {
     if (files && files[field]) {
@@ -34,6 +34,7 @@ export const createPanelDetailsService = async (body, files) => {
     refresh_endpoint_url,
     ...uploadedImages,
     website_logo_variant: website_logo_variant?.trim() ? website_logo_variant : "Logo",
+    website_logo_variant_second: website_logo_variant_second?.trim() ? website_logo_variant_second : "Logo",
     website_logo_web_variant: website_logo_web_variant?.trim() ? website_logo_web_variant : "LoginImage",
     website_logo_mobile_variant: website_logo_mobile_variant?.trim() ? website_logo_mobile_variant : "MloginImage",
     website_favicon_variant: website_favicon_variant?.trim() ? website_favicon_variant : "Favicon"
@@ -95,11 +96,12 @@ export const updatePanelDetailsService = async (panelDetailsId, body, files) => 
   if (body.website_url) updates.website_url = body.website_url;
   if (body.refresh_endpoint_url) updates.refresh_endpoint_url = body.refresh_endpoint_url;
   if (body.website_logo_variant !== undefined) updates.website_logo_variant = body.website_logo_variant?.trim() || 'Logo';
+  if (body.website_logo_variant_second !== undefined) updates.website_logo_variant_second = body.website_logo_variant_second?.trim() || 'Logo';
   if (body.website_logo_web_variant !== undefined) updates.website_logo_web_variant = body.website_logo_web_variant?.trim() || 'LoginImage';
   if (body.website_logo_mobile_variant !== undefined) updates.website_logo_mobile_variant = body.website_logo_mobile_variant?.trim() || 'MloginImage';
   if (body.website_favicon_variant !== undefined) updates.website_favicon_variant = body.website_favicon_variant?.trim() || 'Favicon';
 
-  const uploadFields = ['website_logo', 'website_logo_web', 'website_logo_mobile', 'website_favicon'];
+  const uploadFields = ['website_logo','website_logo_second', 'website_logo_web', 'website_logo_mobile', 'website_favicon'];
   for (const field of uploadFields) {
     if (files && files[field]) {
       const file = files[field][0];
@@ -114,4 +116,13 @@ export const updatePanelDetailsService = async (panelDetailsId, body, files) => 
     message: 'Panel details updated successfully',
     panelDetails: updated,
   };
+};
+
+// service.js
+export const getSinglePanelDetailService = async (_id) => {
+  return await PanelDetails.findById(_id)
+    .populate({
+      path: 'panelId',
+      select: 'username email'
+    });
 };
