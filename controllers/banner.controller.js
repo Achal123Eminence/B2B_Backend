@@ -55,7 +55,7 @@ export const removeBanner = async (req,res) => {
     const result = await removeBannerService(bannerId);
 
     return res.status(200).json({
-      message: 'Delete deleted successfully',
+      message: 'Banner deleted successfully',
     });
     
   } catch (error) {
