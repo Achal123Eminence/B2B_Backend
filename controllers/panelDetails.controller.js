@@ -1,5 +1,7 @@
+import PanelDetails from "../models/panelDetails.model.js";
 import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService, getSinglePanelDetailService } from "../services/panelDetails.service.js";
 import { createPanelDetailsValidation, getPanelDetailsValidation, updatePanelDetailsValidation } from "../validations/panelDetails.validation.js";
+import axios from "axios";
 
 export const createPanelDetails = async (req, res) => {
   try {
@@ -102,3 +104,51 @@ export const getSinglePanelDetails = async (req,res)=>{
     res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }
+
+export const refreshWebsite = async (req, res) => {
+  try {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    }
+
+    const { panelDetailsId } = req.params;
+
+    // Find panel details
+    const panelDetails = await PanelDetails.findById(panelDetailsId);
+    if (!panelDetails) {
+      return res.status(404).json({ error: "PanelDetails not found" });
+    }
+
+    if (!panelDetails.refresh_endpoint_url) {
+      return res.status(400).json({ error: "No refresh_endpoint_url set" });
+    }
+
+    // Hit the refresh endpoint
+    let refreshResponse;
+    try {
+      refreshResponse = await axios.get(panelDetails.refresh_endpoint_url);
+    } catch (err) {
+      return res.status(500).json({ 
+        error: "Failed to call refresh endpoint", 
+        details: err.message 
+      });
+    }
+
+    // Increase version by 0.01
+    const updatedVersion = parseFloat(
+      (panelDetails.website_version + 0.01).toFixed(2)
+    );
+
+    panelDetails.website_version = updatedVersion;
+    await panelDetails.save();
+
+    return res.json({
+      message: "Refresh triggered and version updated",
+      new_version: updatedVersion,
+      refresh_response: refreshResponse.data
+    });
+  } catch (error) {
+    console.error("Error in refreshWebsite API:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};

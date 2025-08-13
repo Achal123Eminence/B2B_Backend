@@ -64,6 +64,10 @@ const panelDetailsSchema = new mongoose.Schema({
   refresh_endpoint_url: {
     type: String,
     default: ""
+  },
+  website_version: {
+    type:Number,
+    default:0
   }
 }, {
   timestamps: true
