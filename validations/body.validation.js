@@ -3,13 +3,15 @@ import Joi from "joi";
 export const createBodyValidation = Joi.object({
   folderId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
   imagePosition: Joi.number().required(),
-  imageClass: Joi.string().valid('no', 'entrance-half').required()
+  imageClass: Joi.string().valid('no', 'entrance-half').required(),
+  bodyVariant: Joi.string().valid('MainImage', 'ClassImage').required()
 });
 
 export const updateBodyValidation = Joi.object({
-    folderId: Joi.string().optional().regex(/^[0-9a-fA-F]{24}$/),
-    imageClass: Joi.string().optional(),
-    imagePosition: Joi.number().integer().min(1).optional()
+  folderId: Joi.string().optional().regex(/^[0-9a-fA-F]{24}$/),
+  imageClass: Joi.string().optional(),
+  imagePosition: Joi.number().integer().min(1).optional(),
+  bodyVariant: Joi.string().valid('MainImage', 'ClassImage').optional(),
 });
 
 export const deleteBodyValidation = {

@@ -6,7 +6,6 @@ import User from "../models/user.model.js";
 export const createBannerService = async(body, file, panelDetailsId) => {
     const { banner_variant, image_type } = body;
 
-    console.log(panelDetailsId,"panelDetailsId")
     const panelDetails = await PanelDetails.findById(panelDetailsId);
     if (!panelDetails) throw new Error('PanelDetails not found');
 
@@ -93,22 +92,31 @@ export const updateBannerService = async (bannerId, body, file) => {
   const user = await User.findById(panelDetails.userId);
   if (!user) throw new Error("User not found");
 
-  let updatedFields = {
-    banner_variant: banner_variant?.trim() || existingBanner.banner_variant,
-    image_type
-  };
+  let updatedFields = {};
 
-  if (image_type === "image") {
-    if (!file) throw new Error("Banner image is required for image type");
+  // Only update variant if it was passed
+  if (typeof banner_variant !== "undefined") {
+    updatedFields.banner_variant = banner_variant.trim();
+  }
 
+  if (file) {
     const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
     updatedFields.banner = result?.result?.id || existingBanner.banner;
   }
 
-  // If image_type is CSV, retain existing banner value or update if file exists
-  if (image_type === "csv" && file) {
-    const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
-    updatedFields.banner = result?.result?.id || existingBanner.banner;
+  if (typeof image_type !== "undefined") {
+    updatedFields.image_type = image_type;
+  }
+
+  // // If image_type is CSV, retain existing banner value or update if file exists
+  // if (image_type === "csv" && file) {
+  //   const result = await uploadToCloudflare(file, user.cloud_account_id, user.cloud_auth);
+  //   updatedFields.banner = result?.result?.id || existingBanner.banner;
+  // }
+
+  // If nothing is being updated
+  if (Object.keys(updatedFields).length === 0) {
+    throw new Error("No fields provided to update");
   }
 
   const updatedBanner = await Banner.findByIdAndUpdate(bannerId, updatedFields, { new: true });

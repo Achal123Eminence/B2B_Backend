@@ -93,3 +93,55 @@ export const updateFolderService = async (folderId, body) => {
         updateFolder
     }
 }
+
+export const copyFoldersService = async (body) => {
+  let { copyFromPanelId, copyToPanelId, importMethod } = body;
+  importMethod = Number(importMethod); // ensure numeric
+
+  // Prevent copying into the same panel
+  if (copyFromPanelId === copyToPanelId) {
+    throw new Error("Source and target panels cannot be the same.");
+  }
+  
+  // Ensure mother panels exist
+  const fromPanel = await MotherPanel.findById(copyFromPanelId);
+  const toPanel = await MotherPanel.findById(copyToPanelId);
+
+  if (!fromPanel) throw new Error("Source Mother Panel not found!");
+  if (!toPanel) throw new Error("Target Mother Panel not found!");
+
+  // Get folders from source panel
+  const sourceFolders = await Folder.find({ panelId: fromPanel._id });
+
+  if (sourceFolders.length === 0) {
+    throw new Error("No folders found in source panel!");
+  }
+
+  // Get existing folders in target panel
+  const targetFolders = await Folder.find({ panelId: toPanel._id });
+  const targetFolderNames = targetFolders.map(f => f.folder_name.toLowerCase());
+
+  // Filter only unique ones
+  const foldersToCopy = sourceFolders.filter(f => 
+    !targetFolderNames.includes(f.folder_name.toLowerCase())
+  );
+
+  if (foldersToCopy.length === 0) {
+    return { message: "No new folders to copy." };
+  }
+
+  // Prepare new documents
+  const newFolders = foldersToCopy.map(f => ({
+    panelId: toPanel._id,
+    folder_name: f.folder_name.toLowerCase(),
+    image_url: importMethod === 2 ? f.image_url : ""
+  }));
+
+  // Insert in bulk
+  await Folder.insertMany(newFolders);
+
+  return { 
+    message: `${newFolders.length} folder(s) copied successfully.`,
+    copiedCount: newFolders.length
+  };
+};

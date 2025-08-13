@@ -20,7 +20,6 @@ export const createMotherPanel = async (req, res) => {
     const newPanel = await createMotherPanelService(req.body);
 
     const populatedPanel = await MotherPanel.findById(newPanel._id).populate('userId', 'username');
-    console.log(populatedPanel,"populatedPanel")
 
     return res.status(201).json({
       message: 'Mother panel created successfully',

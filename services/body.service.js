@@ -5,7 +5,7 @@ import User from "../models/user.model.js";
 import { uploadToCloudflare } from "../helper/uploadCloudFlare.js";
 
 export const createBodyService = async (body, file, panelDetailsId) => {
-  const { folderId, imagePosition, imageClass } = body;
+  const { folderId, imagePosition, imageClass, bodyVariant  } = body;
 
   // 1. Validate PanelDetails
   const panelDetails = await PanelDetails.findById(panelDetailsId);
@@ -52,6 +52,7 @@ export const createBodyService = async (body, file, panelDetailsId) => {
   const newBody = new Body({
     panelDetailsId,
     folderId,
+    bodyVariant: bodyVariant || "MainImage", // Default if not given
     image: imageId,
     imagePosition: imagePosition ?? null,
     imageClass: imageClass || "no",
@@ -66,7 +67,7 @@ export const createBodyService = async (body, file, panelDetailsId) => {
 };
 
 export const updateBodyService = async (bodyId, body, file) => {
-  let { imagePosition, imageClass, folderId } = body;
+  let { imagePosition, imageClass, folderId,bodyVariant  } = body;
 
   // 1. Validate Body
   const existingBody = await Body.findById(bodyId);
@@ -85,6 +86,10 @@ export const updateBodyService = async (bodyId, body, file) => {
     const folder = await Folder.findById(folderId);
     if (!folder) throw new Error("Folder not found");
     existingBody.folderId = folderId;
+  }
+
+  if (bodyVariant) {
+    existingBody.bodyVariant = bodyVariant;
   }
 
   // 5. Handle imagePosition changes
@@ -150,6 +155,15 @@ export const getBodyService = async (panelDetailsId) => {
     .populate({
       path: "panelDetailsId",
       select: "website_name",
+      populate: {
+        path: "userId",
+        model: "User",
+        select: "cloud_account_id cloud_auth cloud_image_url", // choose fields you want
+      }
+    })
+    .populate({
+      path: "folderId",
+      select: "image_url folder_name",
     })
     .sort({ imagePosition: 1 });
 

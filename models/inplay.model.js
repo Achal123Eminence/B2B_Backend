@@ -17,7 +17,7 @@ const inplaySchema = new mongoose.Schema({
   },
   cricket_variant: {
     type: String,
-    default: "inplayforvelki"
+    default: "Inplay"
   },
   virtual_image: {
     type: String,
@@ -25,7 +25,7 @@ const inplaySchema = new mongoose.Schema({
   },
   virtual_variant: {
     type: String,
-    default: "inplayforvelki"
+    default: "Inplay"
   },
   football_image: {
     type: String,
@@ -33,7 +33,7 @@ const inplaySchema = new mongoose.Schema({
   },
   football_variant: {
     type: String,
-    default: "inplayforvelki"
+    default: "Inplay"
   },
   tennis_image: {
     type: String,
@@ -41,7 +41,7 @@ const inplaySchema = new mongoose.Schema({
   },
   tennis_variant: {
     type: String,
-    default: "inplayforvelki"
+    default: "Inplay"
   }
 }, {
   timestamps: true

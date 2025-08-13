@@ -19,6 +19,12 @@ const bodySchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  bodyVariant: {
+    type: String,
+    enum: ['MainImage', 'ClassImage'],
+    default: "MainImage",
+    required: true,
+  },
   imageClass: {
     type: String,
     enum: ['no', 'entrance-half'],

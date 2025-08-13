@@ -34,10 +34,10 @@ export const addOrUpdateInplayService = async (body, files) => {
       panelDetailsId,
       userId: user._id,
       ...uploadedImages,
-      cricket_variant: cricket_variant?.trim() || "inplayforvelki",
-      virtual_variant: virtual_variant?.trim() || "inplayforvelki",
-      football_variant: football_variant?.trim() || "inplayforvelki",
-      tennis_variant: tennis_variant?.trim() || "inplayforvelki",
+      cricket_variant: cricket_variant?.trim() || "Inplay",
+      virtual_variant: virtual_variant?.trim() || "Inplay",
+      football_variant: football_variant?.trim() || "Inplay",
+      tennis_variant: tennis_variant?.trim() || "Inplay",
     });
 
     const saved = await inplay.save();
