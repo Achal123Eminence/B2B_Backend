@@ -67,7 +67,7 @@ const panelDetailsSchema = new mongoose.Schema({
   },
   website_version: {
     type:Number,
-    default:0
+    default:1
   }
 }, {
   timestamps: true

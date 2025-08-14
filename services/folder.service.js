@@ -1,5 +1,6 @@
 import Folder from "../models/folder.model.js";
 import MotherPanel from "../models/motherPanel.model.js";
+import PanelDetails from '../models/panelDetails.model.js';
 
 export const createFolderService = async(body) => {
     const { panelId, folder_name, image_url } = body;
@@ -145,3 +146,17 @@ export const copyFoldersService = async (body) => {
     copiedCount: newFolders.length
   };
 };
+
+export const getFolderListDataService = async (panelDetailsId) => {
+  // 1. Find the panel detail
+  const panel = await PanelDetails.findById(panelDetailsId);
+  if (!panel) throw new Error('PanelDetails not found');
+
+  const panelId = panel.panelId;
+
+  // 2. Get folders linked to this panelId
+  const folders = await Folder.find({ panelId }).select('folder_name image_url _id');
+
+  return folders;
+};
+

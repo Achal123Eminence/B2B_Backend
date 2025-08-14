@@ -1,6 +1,6 @@
 import PanelDetails from "../models/panelDetails.model.js";
-import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService, getSinglePanelDetailService } from "../services/panelDetails.service.js";
-import { createPanelDetailsValidation, getPanelDetailsValidation, updatePanelDetailsValidation } from "../validations/panelDetails.validation.js";
+import { createPanelDetailsService, getPanelDetailsService, deletePanelDetailsService, updatePanelDetailsService, getSinglePanelDetailService, getPanelDetailAllDataService } from "../services/panelDetails.service.js";
+import { createPanelDetailsValidation, getPanelDetailsValidation, updatePanelDetailsValidation, getPanelDetailAllDataValidation } from "../validations/panelDetails.validation.js";
 import axios from "axios";
 
 export const createPanelDetails = async (req, res) => {
@@ -149,6 +149,29 @@ export const refreshWebsite = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in refreshWebsite API:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const getAllData = async (req, res) => {
+  try {
+    // Ensure only admins can create a panel
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    };
+
+    const { error } = getPanelDetailAllDataValidation.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const { website_url } = req.body;
+
+    const result = await getPanelDetailAllDataService(website_url);
+    return res.status(200).json({
+      message:"All data fetched successfully",
+      data:result
+    });
+  } catch (error) {
+    console.error("Error in Get All Data API:", error);
     return res.status(500).json({ error: "Server error" });
   }
 };

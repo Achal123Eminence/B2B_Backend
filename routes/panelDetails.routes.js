@@ -1,5 +1,5 @@
 import express from "express";
-import { createPanelDetails, getPanelDetails, removePanelDetails, updatePanelDetails,getSinglePanelDetails, refreshWebsite } from "../controllers/panelDetails.controller.js";
+import { createPanelDetails, getPanelDetails, removePanelDetails, updatePanelDetails,getSinglePanelDetails, refreshWebsite, getAllData } from "../controllers/panelDetails.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import { upload } from "../helper/multer.js";
 
@@ -33,5 +33,6 @@ panelDetailsRouter.put(
 );
 panelDetailsRouter.get('/getSingleWebsite', authenticate, getSinglePanelDetails);
 panelDetailsRouter.post('/refresh/:panelDetailsId',authenticate,refreshWebsite);
+panelDetailsRouter.post('/getAllData',authenticate,getAllData);
 
 export default panelDetailsRouter;

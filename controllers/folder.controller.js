@@ -1,4 +1,4 @@
-import { createFolderService, getFolderService, deleteFolder, updateFolderService, copyFoldersService } from "../services/folder.service.js";
+import { createFolderService, getFolderService, deleteFolder, updateFolderService, copyFoldersService, getFolderListDataService } from "../services/folder.service.js";
 import { createFolderValidation, getFolderListValidation, updateFolderValidation, copyFoldersValidation } from "../validations/folder.validation.js";
 
 export const createFolder = async (req,res) => {
@@ -109,5 +109,25 @@ export const copyFolders = async (req, res) => {
   } catch (error) {
     console.error('Copy Folders Error:', error.message);
     return res.status(400).json({ error: error.message || 'Something went wrong' });
+  }
+};
+
+export const getFolderListData = async (req, res) => {
+  try {
+    if (req.user?.type !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admins only." });
+    }
+    const { panelDetailsId } = req.params;
+    if (!panelDetailsId) {
+      return res
+        .status(400)
+        .json({ error: "panelDetailsId is required in params" });
+    }
+    
+    const folderList = await getFolderListDataService(panelDetailsId);
+    return res.status(200).json({ folders: folderList });
+  } catch (err) {
+    console.error("Get Folder List Error:", err.message);
+    res.status(500).json({ error: err.message || "Internal server error" });
   }
 };

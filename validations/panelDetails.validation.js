@@ -29,3 +29,10 @@ export const updatePanelDetailsValidation = Joi.object({
   website_logo_mobile_variant: Joi.string().allow('').optional(),
   website_favicon_variant: Joi.string().allow('').optional(),
 });
+
+export const getPanelDetailAllDataValidation = Joi.object({
+  website_url: Joi.string().required().messages({
+    'string.empty': 'website_url is required',
+    'any.required': 'website_url is required'
+  })
+});
